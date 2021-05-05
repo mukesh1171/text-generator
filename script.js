@@ -33,7 +33,6 @@ function pad_sentence(enc_sentence, seqencelength = 7){
     if (enc_sentence.length < seqencelength) {
         console.log('less than sequence length')
         let num_pad = seqencelength - enc_sentence.length
-        console.log(num_pad)
         for (let i = 0; i < num_pad; i++) {
             enc_sentence.push(0)            
         }
@@ -51,31 +50,34 @@ function pad_sentence(enc_sentence, seqencelength = 7){
 
 async function start() {
     let num_words = document.getElementById('num_words').value;
-    console.log(num_words)
     
     model = await tf.loadLayersModel('model/model.json')
     console.log('Model Loaded')
     var input_sentence = document.getElementById("input").value;
-
-    story = input_sentence
-    list_encoded = encode_sentence(input_sentence)
-    paded_sentence = pad_sentence(list_encoded)
-    let inp = tf.tensor([paded_sentence])
+    console.log(input_sentence)
+    if (input_sentence != " ") {
+        story = input_sentence
+        list_encoded = encode_sentence(input_sentence)
+        paded_sentence = pad_sentence(list_encoded)
+        let inp = tf.tensor([paded_sentence])
+        
+        for (let h = 0; h < num_words; h++) {
     
-    for (let h = 0; h < num_words; h++) {
-
-        let result = model.predict(inp).arraySync()[0]
-        let index = result.indexOf(Math.max(...result));
-        console.log(decoder[index])
-        story = story +" "+ decoder[index]
-
-        document.getElementById('story').innerHTML = story
-
-        next = paded_sentence.push(index)
-        paded_sentence.shift()
-        inp = tf.tensor([paded_sentence])       
+            let result = model.predict(inp).arraySync()[0]
+            let index = result.indexOf(Math.max(...result));
+            console.log(decoder[index])
+            story = story +" "+ decoder[index]
+    
+            document.getElementById('story').innerHTML = story
+    
+            next = paded_sentence.push(index)
+            paded_sentence.shift()
+            inp = tf.tensor([paded_sentence])       
+        }
+        inp.dispose()   
+    }else{
+        alert('Give Some Inputs')
     }
-    inp.dispose()
 }
 
 
